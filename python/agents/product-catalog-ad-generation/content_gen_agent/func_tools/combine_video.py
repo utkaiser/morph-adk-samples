@@ -57,7 +57,9 @@ def _get_storyline_schema(num_images: int) -> List[Dict]:
 
     schema = []
     if num_images > 1:
-        schema.append({"name": "before", "generate": True, "step": 0, "duration": 3})
+        schema.append(
+            {"name": "before", "generate": True, "step": 0, "duration": 3}
+        )
 
     for i in range(num_images - 2):
         schema.append(
@@ -108,7 +110,9 @@ def _upload_to_gcs(video_bytes: bytes, filename: str) -> Optional[str]:
             logging.error("GCP_PROJECT environment variable not set.")
             return None
 
-        bucket_name = os.getenv("GCS_BUCKET") or f"{project_id}-contentgen-static"
+        bucket_name = (
+            os.getenv("GCS_BUCKET") or f"{project_id}-contentgen-static"
+        )
         folder_path = _get_datetime_folder_path()
         blob_name = f"{folder_path}{filename}"
 
@@ -134,7 +138,9 @@ async def _load_single_clip(
     """Loads and processes a single video clip artifact."""
     try:
         artifact = await tool_context.load_artifact(filename)
-        if not (artifact and artifact.inline_data and artifact.inline_data.data):
+        if not (
+            artifact and artifact.inline_data and artifact.inline_data.data
+        ):
             logging.warning("Could not load artifact data for %s.", filename)
             return None
 
@@ -186,7 +192,9 @@ async def _load_and_process_video_clips(
             logging.warning("Skipping video file with missing filename.")
             continue
 
-        result = await _load_single_clip(filename, tool_context, temp_dir, storyline)
+        result = await _load_single_clip(
+            filename, tool_context, temp_dir, storyline
+        )
         if result:
             clip, temp_path = result
             video_clips.append(clip)
@@ -227,8 +235,14 @@ async def _load_and_process_audio_clips(
         # Voiceover
         if voiceover_file:
             vo_artifact = await tool_context.load_artifact(voiceover_file)
-            if vo_artifact and vo_artifact.inline_data and vo_artifact.inline_data.data:
-                temp_path = os.path.join(temp_dir, os.path.basename(voiceover_file))
+            if (
+                vo_artifact
+                and vo_artifact.inline_data
+                and vo_artifact.inline_data.data
+            ):
+                temp_path = os.path.join(
+                    temp_dir, os.path.basename(voiceover_file)
+                )
                 with open(temp_path, "wb") as f:
                     f.write(vo_artifact.inline_data.data)
                 vo_clip = AudioFileClip(temp_path)
@@ -270,7 +284,9 @@ async def _combine_and_upload_video(
         gcs_uri = _upload_to_gcs(video_bytes, filename)
         await tool_context.save_artifact(
             filename,
-            genai.types.Part.from_bytes(data=video_bytes, mime_type="video/mp4"),
+            genai.types.Part.from_bytes(
+                data=video_bytes, mime_type="video/mp4"
+            ),
         )
 
         result = {"name": filename}

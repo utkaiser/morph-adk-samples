@@ -104,11 +104,13 @@ async def generate_storyline(
     )
 
     try:
-        image_parts, final_photo_filenames = await _process_asset_sheet_input_images(
-            tool_context,
-            product,
-            photo_filenames,
-            user_provided_asset_sheet_filename,
+        image_parts, final_photo_filenames = (
+            await _process_asset_sheet_input_images(
+                tool_context,
+                product,
+                photo_filenames,
+                user_provided_asset_sheet_filename,
+            )
         )
     except ValueError as e:
         return {"status": "failed", "detail": str(e)}
@@ -195,7 +197,9 @@ async def _process_asset_sheet_input_images(
             image_part = await tool_context.load_artifact(asset_sheet_filename)
             if image_part:
                 image_parts.append(image_part)
-            logging.info("Loaded user-provided asset sheet: %s", asset_sheet_filename)
+            logging.info(
+                "Loaded user-provided asset sheet: %s", asset_sheet_filename
+            )
         else:
             raise ValueError(
                 "Failed: Could not load user-provided asset sheet:"
@@ -306,11 +310,15 @@ def _generate_storyline_text(
         response = client.models.generate_content(
             model=STORYLINE_MODEL,
             contents=contents,
-            config=types.GenerateContentConfig(response_mime_type="application/json"),
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            ),
         )
         if response.text:
             story_data = json.loads(response.text)
-            logging.info("Successfully generated storyline and visual style guide.")
+            logging.info(
+                "Successfully generated storyline and visual style guide."
+            )
             return story_data
         return {"error": "Received an empty response from the model."}
     except (json.JSONDecodeError, ValueError) as e:
@@ -385,7 +393,9 @@ def _process_visual_style_guide(
 
 
 def _create_asset_sheet_prompt(
-    story_data: Dict[str, Union[str, Dict[str, list[Union[Dict[str, str], str]]]]],
+    story_data: Dict[
+        str, Union[str, Dict[str, list[Union[Dict[str, str], str]]]]
+    ],
     style_guide: str,
 ) -> str:
     """Creates the prompt for the asset sheet image."""
@@ -424,7 +434,9 @@ async def _generate_and_select_best_image(
     ]
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    generation_attempts = [res for res in results if isinstance(res, dict) and res]
+    generation_attempts = [
+        res for res in results if isinstance(res, dict) and res
+    ]
     if not generation_attempts:
         logging.error("Failed to generate any asset sheet images.")
         return None
@@ -437,14 +449,17 @@ async def _generate_and_select_best_image(
     if best_attempt["evaluation"].decision != "Pass":
         score = calculate_evaluation_score(best_attempt["evaluation"])
         logging.warning(
-            "No image passed evaluation.Selecting best attempt with score: %s", score
+            "No image passed evaluation.Selecting best attempt with score: %s",
+            score,
         )
 
     return best_attempt
 
 
 async def _generate_asset_sheet_image(
-    story_data: Dict[str, Union[str, Dict[str, list[Union[Dict[str, str], str]]]]],
+    story_data: Dict[
+        str, Union[str, Dict[str, list[Union[Dict[str, str], str]]]]
+    ],
     photo_filenames: List[str],
     tool_context: ToolContext,
     style_guide: str,

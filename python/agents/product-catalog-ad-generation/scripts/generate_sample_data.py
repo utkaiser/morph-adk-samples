@@ -33,10 +33,14 @@ COMPANY_NAME = os.getenv("COMPANY_NAME", "ACME Corp")
 
 # Output directories
 OUTPUT_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "static", "uploads", "products")
+    os.path.join(
+        os.path.dirname(__file__), "..", "static", "uploads", "products"
+    )
 )
 BRANDING_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "static", "uploads", "branding")
+    os.path.join(
+        os.path.dirname(__file__), "..", "static", "uploads", "branding"
+    )
 )
 
 # --- User Configuration ---
@@ -47,7 +51,9 @@ PRODUCT_DESCRIPTION = (
 )
 PRODUCT_COUNT = 5
 # Set LOGO_DESCRIPTION to None to skip logo generation
-LOGO_DESCRIPTION = f"A simple, modern logo with stylized letter for {COMPANY_NAME}"
+LOGO_DESCRIPTION = (
+    f"A simple, modern logo with stylized letter for {COMPANY_NAME}"
+)
 
 # --- Gemini API Client ---
 # Client is initialized in main()
@@ -168,7 +174,9 @@ async def generate_and_save_image(
     Returns image bytes on success.
     """
     try:
-        logging.info("🎨 Generating image for: %s...", os.path.basename(output_path))
+        logging.info(
+            "🎨 Generating image for: %s...", os.path.basename(output_path)
+        )
 
         contents = [prompt]
         if input_parts:
@@ -199,7 +207,9 @@ async def generate_and_save_image(
         return None
 
     except (google_exceptions.InternalServerError, ValueError) as e:
-        logging.error("Error generating image %s: %s", os.path.basename(output_path), e)
+        logging.error(
+            "Error generating image %s: %s", os.path.basename(output_path), e
+        )
         return None
 
 
@@ -221,9 +231,13 @@ def _print_configuration():
 async def _generate_initial_plans(client: genai.Client):
     """Generates the product plan and logo prompt in parallel."""
     logging.info("🤖 Sending requests to Gemini...")
-    tasks = [generate_plan(client, COMPANY_NAME, PRODUCT_DESCRIPTION, PRODUCT_COUNT)]
+    tasks = [
+        generate_plan(client, COMPANY_NAME, PRODUCT_DESCRIPTION, PRODUCT_COUNT)
+    ]
     if LOGO_DESCRIPTION:
-        tasks.append(generate_logo_prompt(client, COMPANY_NAME, LOGO_DESCRIPTION))
+        tasks.append(
+            generate_logo_prompt(client, COMPANY_NAME, LOGO_DESCRIPTION)
+        )
 
     results = await asyncio.gather(*tasks)
     plan = results[0]
@@ -231,7 +245,9 @@ async def _generate_initial_plans(client: genai.Client):
     return plan, logo_prompt
 
 
-def _print_generated_plan(plan: List[ProductImagePlan], logo_prompt: Optional[str]):
+def _print_generated_plan(
+    plan: List[ProductImagePlan], logo_prompt: Optional[str]
+):
     """Prints the generated plan and logo prompt."""
     logging.info("\n--- Generated Plan ---")
     for i, item in enumerate(plan):
@@ -249,7 +265,9 @@ def _confirm_generation(
     """Asks the user to confirm image generation."""
     while True:
         confirm = (
-            input("\nProceed with image generation? (y/n) or 'x' to expand prompts: ")
+            input(
+                "\nProceed with image generation? (y/n) or 'x' to expand prompts: "
+            )
             .strip()
             .lower()
         )
@@ -308,7 +326,9 @@ async def main():
     _print_configuration()
 
     try:
-        with genai.Client(vertexai=True, project=PROJECT, location=LOCATION) as client:
+        with genai.Client(
+            vertexai=True, project=PROJECT, location=LOCATION
+        ) as client:
             plan, logo_prompt = await _generate_initial_plans(client)
 
             if not plan:

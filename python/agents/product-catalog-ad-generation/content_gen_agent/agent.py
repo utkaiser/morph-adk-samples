@@ -22,7 +22,9 @@ import os
 
 from google.adk.agents import Agent
 from google.adk.apps import App
-from google.adk.plugins.save_files_as_artifacts_plugin import SaveFilesAsArtifactsPlugin
+from google.adk.plugins.save_files_as_artifacts_plugin import (
+    SaveFilesAsArtifactsPlugin,
+)
 from google.adk.tools import FunctionTool, load_artifacts
 
 from .func_tools.combine_video import combine

@@ -80,7 +80,9 @@ def _get_gcs_files(folder_prefix: str) -> List[str]:
 
 
 async def _monitor_video_operation(
-    operation: operation.Operation, image_identifier: str, vertex_client: genai.Client
+    operation: operation.Operation,
+    image_identifier: str,
+    vertex_client: genai.Client,
 ) -> Tuple[Optional[GenImage], Optional[str]]:
     """Monitors a video generation operation until completion.
 
@@ -117,7 +119,8 @@ async def _monitor_video_operation(
         return None, error_message
     if not (operation.result and hasattr(operation.result, "generated_videos")):
         logging.warning(
-            "No generated videos found in the response for %s.", image_identifier
+            "No generated videos found in the response for %s.",
+            image_identifier,
         )
         return None, "No videos found in the response."
     return operation.result.generated_videos[0], None
@@ -163,7 +166,9 @@ async def _generate_single_video(
                 aspect_ratio=VIDEO_ASPECT_RATIO,
                 generate_audio=False,
                 number_of_videos=1,
-                duration_seconds=_round_to_nearest_veo_duration(video_input.duration),
+                duration_seconds=_round_to_nearest_veo_duration(
+                    video_input.duration
+                ),
                 fps=VIDEO_FPS,
                 person_generation="allow_all",
                 enhance_prompt=True,
@@ -307,7 +312,10 @@ def _process_results(
             successful_videos.append(res)
         else:
             failed_videos.append(
-                {"source": task_sources[i], "reason": error or "Generation failed"}
+                {
+                    "source": task_sources[i],
+                    "reason": error or "Generation failed",
+                }
             )
 
     successful_videos.sort(

@@ -107,7 +107,9 @@ async def call_gemini_image_api(
         api_exceptions.ResourceExhausted,
         genai.errors.ServerError,
     ) as e:
-        logging.error("Error calling image generation API: %s", e, exc_info=True)
+        logging.error(
+            "Error calling image generation API: %s", e, exc_info=True
+        )
     return None
 
 
@@ -121,5 +123,7 @@ def initialize_gemini_client() -> Optional[genai.Client]:
         client = genai.Client()
         return client
     except (auth.exceptions.DefaultCredentialsError, ValueError) as e:
-        logging.error("Failed to initialize Gemini client: %s", e, exc_info=True)
+        logging.error(
+            "Failed to initialize Gemini client: %s", e, exc_info=True
+        )
         return None
