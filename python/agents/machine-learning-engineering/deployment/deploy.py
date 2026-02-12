@@ -39,8 +39,8 @@ def create() -> None:
             "pandas (>=2.3.1)",
             "scikit-learn (>=1.7.1)",
             "scipy (>=1.16.0)",
-            "lightgbm (>=4.6.0)",
-            "torch @ https://download.pytorch.org/whl/cpu-cxx11-abi/torch-2.7.1%2Bcpu.cxx11.abi-cp312-cp312-linux_x86_64.whl",
+            "torch==2.7.1",      # No URL, just the version
+            "cloudpickle==3.1.2"
         ],
         extra_packages=[
             "./machine_learning_engineering",
