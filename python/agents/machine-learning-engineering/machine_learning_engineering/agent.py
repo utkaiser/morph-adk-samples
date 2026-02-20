@@ -26,9 +26,9 @@ def save_state(
     callback_context: callback_context_module.CallbackContext,
 ) -> types.Content | None:
     """Prints the current state of the callback context."""
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
-    run_cwd = os.path.join(workspace_dir, task_name)
+    run_cwd = os.path.join(results_dir, task_name)
     with open(os.path.join(run_cwd, "final_state.json"), "w") as f:
         json.dump(callback_context.state.to_dict(), f, indent=2)
     return None

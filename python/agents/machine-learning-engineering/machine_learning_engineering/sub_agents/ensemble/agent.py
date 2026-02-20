@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import time
 
 import numpy as np
 from google.adk import agents
@@ -153,37 +154,26 @@ def create_workspace(
 ) -> types.Content | None:
     """Creates workspace."""
     data_dir = callback_context.state.get("data_dir", "")
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
-    run_cwd = os.path.join(workspace_dir, task_name, "ensemble")
-    if os.path.exists(run_cwd):
-        shutil.rmtree(run_cwd)
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    run_cwd = os.path.join(results_dir, task_name, f"ensemble_{timestamp}")
+    callback_context.state["run_cwd_ensemble"] = run_cwd
     # make required directories
-    os.makedirs(
-        os.path.join(workspace_dir, task_name, "ensemble"), exist_ok=True
-    )
-    os.makedirs(
-        os.path.join(workspace_dir, task_name, "ensemble", "input"),
-        exist_ok=True,
-    )
-    os.makedirs(
-        os.path.join(workspace_dir, task_name, "ensemble", "final"),
-        exist_ok=True,
-    )
+    os.makedirs(os.path.join(run_cwd, "input"), exist_ok=True)
+    os.makedirs(os.path.join(run_cwd, "final"), exist_ok=True)
     # copy files to input directory
     files = os.listdir(os.path.join(data_dir, task_name))
     for file in files:
         if os.path.isdir(os.path.join(data_dir, task_name, file)):
             shutil.copytree(
                 os.path.join(data_dir, task_name, file),
-                os.path.join(
-                    workspace_dir, task_name, "ensemble", "input", file
-                ),
+                os.path.join(run_cwd, "input", file),
             )
         elif "answer" not in file:
             common_util.copy_file(
                 os.path.join(data_dir, task_name, file),
-                os.path.join(workspace_dir, task_name, "ensemble", "input"),
+                os.path.join(run_cwd, "input"),
             )
     return None
 

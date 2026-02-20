@@ -239,9 +239,9 @@ def evaluate_code(
         agent_name=agent_name,
         raw_code=raw_code,
     ):
-        workspace_dir = callback_context.state.get("workspace_dir", "")
+        results_dir = callback_context.state.get("results_dir", "")
         task_name = callback_context.state.get("task_name", "")
-        run_cwd = os.path.join(workspace_dir, task_name, task_id)
+        run_cwd = callback_context.state.get(f"run_cwd_{task_id}", os.path.join(results_dir, task_name, task_id))
         result_dict = run_python_code(
             code_text=raw_code,
             run_cwd=run_cwd,

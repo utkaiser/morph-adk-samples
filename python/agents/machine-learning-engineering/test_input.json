@@ -1,0 +1,11 @@
+{
+  "state": {
+    "data_dir": "./tasks/",
+    "task_name": "california-housing-prices",
+    "results_dir": "./results/",
+    "task_type": "Tabular Regression"
+  },
+  "queries": [
+    "execute the task"
+  ]
+}

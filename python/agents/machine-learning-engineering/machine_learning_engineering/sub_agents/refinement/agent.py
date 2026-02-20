@@ -34,11 +34,11 @@ def update_outer_loop_states(
     """Updates outer loop states."""
     task_id = callback_context.agent_name.split("_")[-1]
     step = callback_context.state.get(f"refine_step_{task_id}", 0)
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
     lower = callback_context.state.get("lower", True)
     inner_loop_round = callback_context.state.get("inner_loop_round", 2)
-    run_cwd = os.path.join(workspace_dir, task_name, task_id)
+    run_cwd = callback_context.state.get(f"run_cwd_{task_id}", os.path.join(results_dir, task_name, task_id))
     prev_solution = callback_context.state.get(
         f"train_code_{step}_{task_id}", ""
     )

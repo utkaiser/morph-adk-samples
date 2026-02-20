@@ -27,10 +27,10 @@ def get_model_candidates(
 ) -> llm_response_module.LlmResponse | None:
     """Gets the model candidates."""
     task_id = callback_context.agent_name.split("_")[-1]
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
     num_model_candidates = callback_context.state.get("num_model_candidates", 2)
-    run_cwd = os.path.join(workspace_dir, task_name, task_id)
+    run_cwd = callback_context.state.get(f"run_cwd_{task_id}", os.path.join(results_dir, task_name, task_id))
     try:
         response_text = common_util.get_text_from_response(llm_response)
         start_idx, end_idx = (
@@ -162,10 +162,10 @@ def rank_candidate_solutions(
     callback_context: callback_context_module.CallbackContext,
 ) -> types.Content | None:
     """Ranks the candidate solutions based on their scores."""
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
     task_id = callback_context.agent_name.split("_")[-1]
-    run_cwd = os.path.join(workspace_dir, task_name, task_id)
+    run_cwd = callback_context.state.get(f"run_cwd_{task_id}", os.path.join(results_dir, task_name, task_id))
     num_model_candidates = callback_context.state.get("num_model_candidates", 2)
     performance_results = []
     for k in range(num_model_candidates):
@@ -213,10 +213,10 @@ def select_best_solution(
     callback_context: callback_context_module.CallbackContext,
 ) -> types.Content | None:
     """Selects the best solution."""
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
     task_id = callback_context.agent_name.split("_")[-1]
-    run_cwd = os.path.join(workspace_dir, task_name, task_id)
+    run_cwd = callback_context.state.get(f"run_cwd_{task_id}", os.path.join(results_dir, task_name, task_id))
     best_idx = callback_context.state.get(f"best_idx_{task_id}", 0)
     response = callback_context.state.get(
         f"merger_code_{task_id}_{best_idx}", ""
@@ -275,6 +275,7 @@ def prepare_task(
     for key in config_dict:
         callback_context.state[key] = config_dict[key]
     callback_context.state["start_time"] = time.time()
+    callback_context.state["timestamp"] = time.strftime("%m-%d-%Y-%H-%M-%S")
     # fix randomness
     common_util.set_random_seed(callback_context.state["seed"])
     task_name = callback_context.state.get("task_name", "")
@@ -291,33 +292,27 @@ def create_workspace(
 ) -> types.Content | None:
     """Creates workspace."""
     data_dir = callback_context.state.get("data_dir", "")
-    workspace_dir = callback_context.state.get("workspace_dir", "")
+    results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
     task_id = callback_context.agent_name.split("_")[-1]
-    run_cwd = os.path.join(workspace_dir, task_name, task_id)
-    if os.path.exists(run_cwd):
-        shutil.rmtree(run_cwd)
+    timestamp = callback_context.state.get("timestamp", time.strftime("%m-%d-%Y-%H-%M-%S"))
+    run_cwd = os.path.join(results_dir, f"{task_name}_{timestamp}", task_id)
+    callback_context.state[f"run_cwd_{task_id}"] = run_cwd
     # make required directories
-    os.makedirs(os.path.join(workspace_dir, task_name, task_id), exist_ok=True)
-    os.makedirs(
-        os.path.join(workspace_dir, task_name, task_id, "input"), exist_ok=True
-    )
-    os.makedirs(
-        os.path.join(workspace_dir, task_name, task_id, "model_candidates"),
-        exist_ok=True,
-    )
+    os.makedirs(os.path.join(run_cwd, "input"), exist_ok=True)
+    os.makedirs(os.path.join(run_cwd, "model_candidates"), exist_ok=True)
     # copy files to input directory
     files = os.listdir(os.path.join(data_dir, task_name))
     for file in files:
         if os.path.isdir(os.path.join(data_dir, task_name, file)):
             shutil.copytree(
                 os.path.join(data_dir, task_name, file),
-                os.path.join(workspace_dir, task_name, task_id, "input", file),
+                os.path.join(run_cwd, "input", file),
             )
         elif "answer" not in file:
             common_util.copy_file(
                 os.path.join(data_dir, task_name, file),
-                os.path.join(workspace_dir, task_name, task_id, "input"),
+                os.path.join(run_cwd, "input"),
             )
     return None
 
