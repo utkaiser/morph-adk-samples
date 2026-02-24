@@ -1,3 +1,7 @@
-results
+testing/results
+testing/cache
+testing/temp_bench
+testing/tasks/
+testing/claude-results
 *.txt
 *.csv

@@ -8,15 +8,15 @@ import os
 class DefaultConfig:
     """Default configuration."""
 
-    data_dir: str = "./tasks/"  # the directory path where the machine learning tasks and their data are stored.
-    task_name: str = "california-housing-prices"  # The name of the specific task to be loaded and processed.
+    data_dir: str = "./testing/tasks/"  # the directory path where the machine learning tasks and their data are stored.
+    task_name: str = ""  # The name of the specific task to be loaded and processed. Must be set via the input state.
     task_type: str = (
-        "Tabular Regression"  # The type of machine learning problem.
+        "Machine Learning Task"  # The type of machine learning problem.
     )
     lower: bool = True  # True if a lower value of the metric is better.
-    results_dir: str = "./results/"  # Directory used for saving intermediate outputs, results, logs.
+    results_dir: str = "./testing/results/"  # Directory used for saving intermediate outputs, results, logs.
     agent_model: str = os.environ.get(
-        "ROOT_AGENT_MODEL", "gemini-2.0-flash-001"
+        "ROOT_AGENT_MODEL", "gemini-2.5-flash-001"
     )  # Name the LLM model to be used by the agent.
     task_description: str = ""  # The detailed description of the task.
     task_summary: str = ""  # The concise summary of the task.

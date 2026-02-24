@@ -273,16 +273,39 @@ def prepare_task(
     """Prepares things for the task."""
     config_dict = dataclasses.asdict(config.CONFIG)
     for key in config_dict:
-        callback_context.state[key] = config_dict[key]
+        if key not in callback_context.state:
+            callback_context.state[key] = config_dict[key]
     callback_context.state["start_time"] = time.time()
-    callback_context.state["timestamp"] = time.strftime("%m-%d-%Y-%H-%M-%S")
+    if "timestamp" not in callback_context.state:
+        callback_context.state["timestamp"] = time.strftime("%m-%d-%Y-%H-%M-%S")
     # fix randomness
     common_util.set_random_seed(callback_context.state["seed"])
     task_name = callback_context.state.get("task_name", "")
     data_dir = callback_context.state.get("data_dir", "")
-    task_description = open(
-        os.path.join(data_dir, task_name, "task_description.txt"),
-    ).read()
+    task_dir = os.path.join(data_dir, task_name)
+    # Find description file — try common names in order
+    description_candidates = ["description.md", "task_description.txt", "README.md"]
+    task_description = ""
+    for candidate in description_candidates:
+        candidate_path = os.path.join(task_dir, candidate)
+        if os.path.isfile(candidate_path):
+            task_description = open(candidate_path).read()
+            break
+    # Append a top-level listing so the agent knows what to work with.
+    # Directories are summarized (name + count) rather than expanded, to avoid
+    # enumerating tens-of-thousands of image filenames into the context.
+    file_listing_lines = []
+    for entry in sorted(os.listdir(task_dir)):
+        if entry == "__pycache__":
+            continue
+        entry_path = os.path.join(task_dir, entry)
+        if os.path.isdir(entry_path):
+            n = sum(len(fs) for _, _, fs in os.walk(entry_path))
+            file_listing_lines.append(f"  {entry}/  ({n} files)")
+        else:
+            file_listing_lines.append(f"  {entry}")
+    if file_listing_lines:
+        task_description += "\n\n## Available files\n" + "\n".join(file_listing_lines)
     callback_context.state["task_description"] = task_description
     return None
 
@@ -383,11 +406,20 @@ def get_check_data_use_instruction(
     )
 
 
+def log_and_check_model_finish(
+    callback_context: callback_context_module.CallbackContext,
+    llm_request: llm_request_module.LlmRequest,
+) -> llm_response_module.LlmResponse | None:
+    common_util.log_context_size(callback_context, llm_request)
+    return check_model_finish(callback_context, llm_request)
+
+
 task_summarization_agent = agents.Agent(
     model=config.CONFIG.agent_model,
     name="task_summarization_agent",
     description="Summarize the task description.",
     instruction=prompt.SUMMARIZATION_AGENT_INSTR,
+    before_model_callback=common_util.log_context_size,
     after_model_callback=get_task_summary,
     generate_content_config=types.GenerateContentConfig(
         temperature=0.0,
@@ -402,7 +434,7 @@ for k in range(config.CONFIG.num_solutions):
         description="Retrieve effective models for solving a given task.",
         instruction=get_model_retriever_agent_instruction,
         tools=[google_search],
-        before_model_callback=check_model_finish,
+        before_model_callback=log_and_check_model_finish,
         after_model_callback=get_model_candidates,
         generate_content_config=types.GenerateContentConfig(
             temperature=1.0,

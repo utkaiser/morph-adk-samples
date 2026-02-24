@@ -1,0 +1,11 @@
+{
+  "state": {
+    "data_dir": "./testing/tasks/",
+    "task_name": "aerial-cactus-identification",
+    "results_dir": "./testing/results/",
+    "task_type": "Tabular Regression"
+  },
+  "queries": [
+    "execute the task"
+  ]
+}

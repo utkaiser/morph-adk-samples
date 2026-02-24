@@ -1,0 +1,17 @@
+competitions:
+  - aerial-cactus-identification
+  # - aptos2019-blindness-detection
+  # - denoising-dirty-documents
+  # - spaceship-titanic
+  # - petfinder-pawpularity-score
+  # - dogs-vs-cats-redux-kernels-edition
+  # - jigsaw-toxic-comment-classification-challenge
+  # - spooky-author-identification
+  # - invasive-species-monitoring
+  # - leaf-classification
+  # - dog-breed-identification
+  # - random-acts-of-pizza
+  # - jigsaw-unintended-bias-in-toxicity-classification
+  # - tweet-sentiment-extraction
+  # - google-quest-challenge
+  # - new-york-city-taxi-fare-prediction

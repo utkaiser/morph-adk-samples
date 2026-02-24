@@ -24,6 +24,8 @@ dependencies = [
     # Note: If using uv or pip, use --extra-index-url https://download.pytorch.org/whl/cpu 
     # to ensure the CPU version of torch is prioritized.
     "torch>=2.7.1",
+    "kaggle (<1.7)",
+    "mlebench @ file:///usr/local/google/home/luiskaiser/Documents/morph-adk-samples/python/agents/machine-learning-engineering/testing/temp_bench",
 ]
 
 [dependency-groups]
@@ -52,6 +54,9 @@ known-first-party = ["machine_learning_engineering"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
+
+[tool.poetry.dependencies]
+mlebench = {develop = true}
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

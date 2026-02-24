@@ -156,8 +156,8 @@ def create_workspace(
     data_dir = callback_context.state.get("data_dir", "")
     results_dir = callback_context.state.get("results_dir", "")
     task_name = callback_context.state.get("task_name", "")
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    run_cwd = os.path.join(results_dir, task_name, f"ensemble_{timestamp}")
+    timestamp = callback_context.state.get("timestamp", time.strftime("%m-%d-%Y-%H-%M-%S"))
+    run_cwd = os.path.join(results_dir, f"{task_name}_{timestamp}", "ensemble")
     callback_context.state["run_cwd_ensemble"] = run_cwd
     # make required directories
     os.makedirs(os.path.join(run_cwd, "input"), exist_ok=True)
