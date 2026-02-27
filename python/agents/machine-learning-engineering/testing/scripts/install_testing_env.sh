@@ -3,9 +3,17 @@
 echo ">>> Initializing local virtual environment..."
 poetry config virtualenvs.in-project true
 
-# 1. Clone MLE-bench if missing
+# 1. Clone MLE-bench if missing, then fetch leaderboard CSVs via git-lfs
 if [ ! -d "testing/temp_bench" ]; then
     git clone https://github.com/openai/mle-bench.git testing/temp_bench
+fi
+
+echo ">>> Fetching leaderboard files (git lfs)..."
+if ! command -v git-lfs &>/dev/null; then
+    echo ">>> WARNING: git-lfs not found. Leaderboard ranking will be unavailable."
+    echo ">>>          Install it with: sudo apt install git-lfs  (or brew install git-lfs)"
+else
+    git -C testing/temp_bench lfs pull --include "mlebench/competitions/*/leaderboard.csv"
 fi
 
 # 2. Setup isolated environment

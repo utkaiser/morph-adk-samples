@@ -1,4 +1,5 @@
 competitions:
+  - predict-volcanic-eruptions-ingv-oe
   - aerial-cactus-identification
   # - aptos2019-blindness-detection
   # - denoising-dirty-documents

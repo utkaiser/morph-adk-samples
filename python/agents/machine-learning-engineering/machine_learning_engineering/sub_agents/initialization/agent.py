@@ -306,6 +306,14 @@ def prepare_task(
             file_listing_lines.append(f"  {entry}")
     if file_listing_lines:
         task_description += "\n\n## Available files\n" + "\n".join(file_listing_lines)
+    # Auto-read any text files inside a literature/ subfolder and inject their content.
+    literature_dir = os.path.join(task_dir, "literature")
+    if os.path.isdir(literature_dir):
+        for fname in sorted(os.listdir(literature_dir)):
+            if fname.endswith((".md", ".txt")):
+                fpath = os.path.join(literature_dir, fname)
+                content = open(fpath).read()
+                task_description += f"\n\n## Literature: {fname}\n{content}"
     callback_context.state["task_description"] = task_description
     return None
 
@@ -410,7 +418,6 @@ def log_and_check_model_finish(
     callback_context: callback_context_module.CallbackContext,
     llm_request: llm_request_module.LlmRequest,
 ) -> llm_response_module.LlmResponse | None:
-    common_util.log_context_size(callback_context, llm_request)
     return check_model_finish(callback_context, llm_request)
 
 
@@ -419,7 +426,6 @@ task_summarization_agent = agents.Agent(
     name="task_summarization_agent",
     description="Summarize the task description.",
     instruction=prompt.SUMMARIZATION_AGENT_INSTR,
-    before_model_callback=common_util.log_context_size,
     after_model_callback=get_task_summary,
     generate_content_config=types.GenerateContentConfig(
         temperature=0.0,
